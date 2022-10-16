@@ -1,21 +1,17 @@
-from faulthandler import disable
-from pickle import FALSE
 from time import time
 import tkinter as tk
-from datetime import date, datetime
-from tkinter.tix import Tree
-from turtle import position
+from datetime import datetime
 import threading
 import time
-import app
 from recorder import Recorder
 
 FILE = "exercises.txt"
      
 class MainApplication(tk.Frame):
     def __init__(self, parent, *args, **kwargs):
-        tk.Frame.__init__(self, parent,*args, **kwargs)
+        frame = tk.Frame.__init__(self, parent,*args, **kwargs)
         self.parent = parent
+        self.parent.attributes('-topmost',True)
         self.stopVideo = False
         self.repeatVideo = False
         
@@ -28,7 +24,7 @@ class MainApplication(tk.Frame):
         self.datetime = datetime.now()
         self.counter = 0
         self.exercises = open(FILE, 'r').read().splitlines()
-
+        self.exercises = [x.replace(' ','-') for x in self.exercises]
         self.startCamThread()
 
         #Create Interative Menu
@@ -49,9 +45,9 @@ class MainApplication(tk.Frame):
 
     def startRecord(self):
         while(True):
-            #time.sleep(1)
-            filename = self.datetime.strftime("%Y_%m_%d_%H_%M_%S_"+str(self.exercises[self.counter]))
-            recorder = Recorder(filename)
+            filename = self.exercises[self.counter]
+            timestamp = self.datetime.strftime("%Y_%m_%d_%H_%M_%S")
+            recorder = Recorder(filename, timestamp)
             recorder.startRecording()
            
             print("Recording for {0}".format(filename))
@@ -62,7 +58,8 @@ class MainApplication(tk.Frame):
             if(self.repeatVideo):
                 self.repeatVideo = False
             else:
-                recorder.saveRecording()
+                recorder.saveAndPublish()
+                time.sleep(1)
                 self.counter = self.counter + 1
                 if (self.counter >= len(self.exercises)):
                     break
@@ -72,6 +69,8 @@ class MainApplication(tk.Frame):
             
             self.stopVideo = False
 
+            "Waiting for camera to reload"
+            time.sleep(1)
 
     def save_and_send_cam_audio_recording(self):
         self.stopVideo = True

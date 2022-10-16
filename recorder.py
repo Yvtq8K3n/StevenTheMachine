@@ -13,14 +13,18 @@ import time
 import subprocess
 import os
 import ffmpeg
+from youtube_upload import YoutubeUploader
+from discord_notifier import SingleMessageSender
 
 REC_FOLDER = "recordings/"
+YOUTUBE_LINK = "https://www.youtube.com/watch?v="
 
 class Recorder():
-    def __init__(self, filename):
-        self.filename = filename
-        self.video_thread = self.VideoRecorder(self, REC_FOLDER + filename)
-        self.audio_thread = self.AudioRecorder(self, REC_FOLDER + filename)
+    def __init__(self, name, timestamp):
+        self.name = name
+        self.filename = timestamp + " " + name
+        self.video_thread = self.VideoRecorder(self, REC_FOLDER + self.filename)
+        self.audio_thread = self.AudioRecorder(self, REC_FOLDER + self.filename)
 
     def startRecording(self):
         self.video_thread.start()
@@ -29,6 +33,24 @@ class Recorder():
     def stopRecording(self):
         self.video_thread.stop()
         self.audio_thread.stop()
+
+    def saveAndPublish(self):
+        self.save_thread = threading.Thread(target=self.__saveAndPublish)
+        self.save_thread.start()
+
+    def __saveAndPublish(self):
+        self.saveRecording()
+
+        #Upload on youtube
+        youtubeUploader = YoutubeUploader(REC_FOLDER + self.filename + ".mp4", self.filename)
+        videoId = youtubeUploader.upload()
+
+        #Send message with video link to discord
+        SingleMessageSender(channel_name=self.name, message=YOUTUBE_LINK + videoId)
+
+        #Deleting temporary files
+        os.remove(self.video_thread.video_filename)
+        os.remove(self.audio_thread.audio_filename)
 
     def saveRecording(self):
         #Save audio / Show video resume
