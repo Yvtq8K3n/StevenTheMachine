@@ -110,7 +110,7 @@ class YoutubeUploader:
 
         return response['id']
 
-    def get_authenticated_service(video):
+    def get_authenticated_service(self):
         flow = flow_from_clientsecrets(CLIENT_SECRETS_FILE,
                                     scope=YOUTUBE_UPLOAD_SCOPE,
                                     message=MISSING_CLIENT_SECRETS_MESSAGE)
@@ -190,4 +190,3 @@ class YoutubeUploader:
                     % sleep_seconds)
                 time.sleep(sleep_seconds)
         return response
-

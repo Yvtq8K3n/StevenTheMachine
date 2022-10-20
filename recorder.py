@@ -22,7 +22,7 @@ YOUTUBE_LINK = "https://www.youtube.com/watch?v="
 class Recorder():
     def __init__(self, name, timestamp):
         self.name = name
-        self.filename = timestamp + " " + name
+        self.filename = timestamp + "_" + name
         self.video_thread = self.VideoRecorder(self, REC_FOLDER + self.filename)
         self.audio_thread = self.AudioRecorder(self, REC_FOLDER + self.filename)
 
@@ -40,10 +40,11 @@ class Recorder():
 
     def __saveAndPublish(self):
         self.saveRecording()
-
+        print("file_saved")
         #Upload on youtube
         youtubeUploader = YoutubeUploader(REC_FOLDER + self.filename + ".mp4", self.filename)
         videoId = youtubeUploader.upload()
+        print("uploaded")
 
         #Send message with video link to discord
         SingleMessageSender(channel_name=self.name, message=YOUTUBE_LINK + videoId)
