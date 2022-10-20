@@ -2,3 +2,6 @@
 __pycache__
 recordings/
 exercises.txt
+app.py-oauth2.json
+client_secrets.json
+discord_token.json
